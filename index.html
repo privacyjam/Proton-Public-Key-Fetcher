@@ -23,27 +23,23 @@
         }
 
         #pgpKey {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             background: #f9f9f9;
-            padding: 20px;
+            padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            text-align: center;
             white-space: pre-wrap;
             word-wrap: break-word;
-            max-width: 90%;
-            width: 80%;
-            height: 300px; /* Fixed height for the box */
+            max-width: 70%; /* Shorter width */
+            height: 300px; /* Taller height */
+            overflow-y: auto; /* Add scroll if the content overflows */
             margin: 20px auto;
-            display: flex;
-            align-items: center; /* Center text vertically */
-            justify-content: center; /* Center text horizontally */
-            text-align: center; /* Center text for multi-line cases */
-            overflow-y: auto; /* Scrollable for long keys */
         }
 
         .btn-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
             margin-top: 15px;
         }
 
@@ -87,7 +83,7 @@
     <h1>Proton Public Key Fetcher</h1>
     <input type="email" id="email" placeholder="Enter email address" required>
     <button onclick="fetchPGPKey()">Fetch PGP Key</button>
-    <pre id="pgpKey">Enter an email to fetch its PGP key.</pre>
+    <div id="pgpKey">Enter an email to fetch the PGP key.</div>
 
     <div class="btn-container">
         <button class="btn-small" id="copyBtn" onclick="copyToClipboard()" style="display:none;">📋 Copy</button>
@@ -105,15 +101,13 @@
             const copyBtn = document.getElementById("copyBtn");
             const downloadLink = document.getElementById("downloadLink");
 
-            // Clear previous results
-            pgpKeyEl.textContent = "Fetching PGP key...";
-            pgpKeyEl.style.color = "black"; // Reset color
+            // Reset the display
+            pgpKeyEl.textContent = "Fetching...";
             copyBtn.style.display = "none";
             downloadLink.style.display = "none";
 
             if (!email) {
-                pgpKeyEl.textContent = "⚠️ Please enter a valid email address.";
-                pgpKeyEl.style.color = "red"; // Error message in red
+                pgpKeyEl.textContent = "Please enter a valid email address.";
                 return;
             }
 
@@ -123,24 +117,19 @@
                 const response = await fetch(url);
                 const text = await response.text();
 
-                if (text.includes("No keys found")) {
-                    pgpKeyEl.textContent = "No PGP key found for this email.";
-                    pgpKeyEl.style.color = "red"; // Error message in red
-                } else {
-                    pgpKeyEl.textContent = text; // Display the PGP key
-                    pgpKeyEl.style.color = "black"; // Reset to default text color
+                pgpKeyEl.textContent = text; // Display the API response directly
 
-                    // Show copy and download buttons
+                // Show copy and download options if key is found
+                if (!text.includes("No keys found")) {
                     copyBtn.style.display = "inline-block";
                     downloadLink.style.display = "inline-block";
 
-                    // Set download link for .asc file
+                    // Set download link for the .asc file
                     const blob = new Blob([text], { type: "text/plain" });
                     downloadLink.href = URL.createObjectURL(blob);
                 }
             } catch (error) {
                 pgpKeyEl.textContent = "Error fetching key. Please try again.";
-                pgpKeyEl.style.color = "red"; // Error message in red
             }
         }
 
