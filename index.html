@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PGP Key Fetcher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ddd;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-width: 90%;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>ProtonMail PGP Key Fetcher</h1>
+    <input type="email" id="email" placeholder="Enter email address" required>
+    <button onclick="fetchPGPKey()">Fetch PGP Key</button>
+    <p id="message"></p>
+    <pre id="pgpKey"></pre>
+
+    <script>
+        async function fetchPGPKey() {
+            const email = document.getElementById("email").value.trim();
+            const messageEl = document.getElementById("message");
+            const pgpKeyEl = document.getElementById("pgpKey");
+            
+            if (!email) {
+                messageEl.innerHTML = "Please enter an email address.";
+                return;
+            }
+
+            const url = `https://api.protonmail.ch/pks/lookup?op=get&search=${encodeURIComponent(email)}`;
+
+            messageEl.innerHTML = "Fetching PGP key...";
+            pgpKeyEl.textContent = "";
+
+            try {
+                const response = await fetch(url);
+                const text = await response.text();
+
+                if (text.includes("No keys found")) {
+                    messageEl.innerHTML = "No PGP key found for this email.";
+                } else {
+                    messageEl.innerHTML = "PGP Key found:";
+                    pgpKeyEl.textContent = text;
+                }
+            } catch (error) {
+                messageEl.innerHTML = "Error fetching key. Please try again.";
+            }
+        }
+    </script>
+
+</body>
+</html>
