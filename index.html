@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PGP Key Fetcher</title>
+    <title>Proton Public Key Fetcher</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -23,7 +23,6 @@
             word-wrap: break-word;
             max-width: 90%;
             margin: auto;
-            position: relative;
         }
         .btn-container {
             margin-top: 10px;
@@ -34,11 +33,15 @@
             cursor: pointer;
             margin: 5px;
         }
+        footer {
+            margin-top: 20px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
 
-    <h1>ProtonMail PGP Key Fetcher</h1>
+    <h1>Proton Public Key Fetcher</h1>
     <input type="email" id="email" placeholder="Enter email address" required>
     <button onclick="fetchPGPKey()">Fetch PGP Key</button>
     <p id="message"></p>
@@ -48,6 +51,10 @@
         <button class="btn-small" id="copyBtn" onclick="copyToClipboard()" style="display:none;">📋 Copy</button>
         <a class="btn-small" id="downloadLink" style="display:none;" download="public.asc">⬇️ Download .asc</a>
     </div>
+
+    <footer>
+        <p><a href="https://github.com/jamjamr/Proton-Public-Key-Fetcher" target="_blank">View Source Code on GitHub</a></p>
+    </footer>
 
     <script>
         async function fetchPGPKey() {
