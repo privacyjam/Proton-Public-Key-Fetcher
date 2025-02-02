@@ -24,18 +24,20 @@
 
         #pgpKey {
             background: #f9f9f9;
-            padding: 10px;
+            padding: 20px;
             border: 1px solid #ccc;
             border-radius: 5px;
             white-space: pre-wrap;
             word-wrap: break-word;
             max-width: 90%;
             width: 80%;
-            height: auto;
-            max-height: 300px; /* Limit the height of the box */
-            overflow-y: auto; /* Add scroll if the content overflows */
+            height: 300px; /* Fixed height for the box */
             margin: 20px auto;
-            text-align: left; /* Keep text left-aligned for better readability */
+            display: flex;
+            align-items: center; /* Center text vertically */
+            justify-content: center; /* Center text horizontally */
+            text-align: center; /* Center text for multi-line cases */
+            overflow-y: auto; /* Scrollable for long keys */
         }
 
         .btn-container {
@@ -85,8 +87,7 @@
     <h1>Proton Public Key Fetcher</h1>
     <input type="email" id="email" placeholder="Enter email address" required>
     <button onclick="fetchPGPKey()">Fetch PGP Key</button>
-    <p id="message"></p>
-    <pre id="pgpKey"></pre>
+    <pre id="pgpKey">Enter an email to fetch its PGP key.</pre>
 
     <div class="btn-container">
         <button class="btn-small" id="copyBtn" onclick="copyToClipboard()" style="display:none;">📋 Copy</button>
@@ -100,37 +101,36 @@
     <script>
         async function fetchPGPKey() {
             const email = document.getElementById("email").value.trim();
-            const messageEl = document.getElementById("message");
             const pgpKeyEl = document.getElementById("pgpKey");
             const copyBtn = document.getElementById("copyBtn");
             const downloadLink = document.getElementById("downloadLink");
 
+            // Clear previous results
+            pgpKeyEl.textContent = "Fetching PGP key...";
+            pgpKeyEl.style.color = "black"; // Reset color
+            copyBtn.style.display = "none";
+            downloadLink.style.display = "none";
+
             if (!email) {
-                messageEl.innerHTML = "⚠️ Please enter an email address.";
-                pgpKeyEl.textContent = ""; // Clear PGP key display
-                copyBtn.style.display = "none";
-                downloadLink.style.display = "none";
+                pgpKeyEl.textContent = "⚠️ Please enter a valid email address.";
+                pgpKeyEl.style.color = "red"; // Error message in red
                 return;
             }
 
             const url = `https://api.protonmail.ch/pks/lookup?op=get&search=${encodeURIComponent(email)}`;
-
-            messageEl.innerHTML = "⏳ Fetching PGP key...";
-            pgpKeyEl.textContent = ""; // Clear previous PGP key content
-            copyBtn.style.display = "none";
-            downloadLink.style.display = "none";
 
             try {
                 const response = await fetch(url);
                 const text = await response.text();
 
                 if (text.includes("No keys found")) {
-                    messageEl.innerHTML = "❌ No PGP key found for this email.";
+                    pgpKeyEl.textContent = "No PGP key found for this email.";
+                    pgpKeyEl.style.color = "red"; // Error message in red
                 } else {
-                    messageEl.innerHTML = "✅ PGP Key found:";
-                    pgpKeyEl.textContent = text;
+                    pgpKeyEl.textContent = text; // Display the PGP key
+                    pgpKeyEl.style.color = "black"; // Reset to default text color
 
-                    // Show the copy button and download link
+                    // Show copy and download buttons
                     copyBtn.style.display = "inline-block";
                     downloadLink.style.display = "inline-block";
 
@@ -139,7 +139,8 @@
                     downloadLink.href = URL.createObjectURL(blob);
                 }
             } catch (error) {
-                messageEl.innerHTML = "❌ Error fetching key. Please try again.";
+                pgpKeyEl.textContent = "Error fetching key. Please try again.";
+                pgpKeyEl.style.color = "red"; // Error message in red
             }
         }
 
@@ -150,10 +151,8 @@
             navigator.clipboard.writeText(pgpKeyEl.textContent)
                 .then(() => {
                     copyBtn.textContent = "✔ Copied!";
-                    copyBtn.classList.add("copied");
                     setTimeout(() => {
                         copyBtn.textContent = "📋 Copy";
-                        copyBtn.classList.remove("copied");
                     }, 1500);
                 })
                 .catch(err => console.error("Failed to copy text", err));
