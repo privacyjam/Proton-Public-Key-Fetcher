@@ -1,3 +1,1 @@
-![image](https://github.com/user-attachments/assets/eb795d86-c359-4ed2-9cdb-fbf2c64d8c32)
-
-URL in About Section
+![image](https://github.com/user-attachments/assets/804a9c45-4c53-4b30-80f1-c7fa41e46584)
