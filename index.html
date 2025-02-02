@@ -23,15 +23,30 @@
             word-wrap: break-word;
             max-width: 90%;
             margin: auto;
+            text-align: left;
         }
         .btn-container {
             margin-top: 10px;
         }
         .btn-small {
-            padding: 5px 10px;
+            padding: 8px 12px;
             font-size: 14px;
             cursor: pointer;
             margin: 5px;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .btn-small:hover {
+            background: #0056b3;
+        }
+        .btn-small:active {
+            background: #004494;
+        }
+        #copyBtn.copied {
+            background: #28a745;
         }
         footer {
             margin-top: 20px;
@@ -63,15 +78,15 @@
             const pgpKeyEl = document.getElementById("pgpKey");
             const copyBtn = document.getElementById("copyBtn");
             const downloadLink = document.getElementById("downloadLink");
-            
+
             if (!email) {
-                messageEl.innerHTML = "Please enter an email address.";
+                messageEl.innerHTML = "⚠️ Please enter an email address.";
                 return;
             }
 
             const url = `https://api.protonmail.ch/pks/lookup?op=get&search=${encodeURIComponent(email)}`;
 
-            messageEl.innerHTML = "Fetching PGP key...";
+            messageEl.innerHTML = "⏳ Fetching PGP key...";
             pgpKeyEl.textContent = "";
             copyBtn.style.display = "none";
             downloadLink.style.display = "none";
@@ -81,9 +96,9 @@
                 const text = await response.text();
 
                 if (text.includes("No keys found")) {
-                    messageEl.innerHTML = "No PGP key found for this email.";
+                    messageEl.innerHTML = "❌ No PGP key found for this email.";
                 } else {
-                    messageEl.innerHTML = "PGP Key found:";
+                    messageEl.innerHTML = "✅ PGP Key found:";
                     pgpKeyEl.textContent = text;
 
                     // Show the copy button and download link
@@ -95,15 +110,24 @@
                     downloadLink.href = URL.createObjectURL(blob);
                 }
             } catch (error) {
-                messageEl.innerHTML = "Error fetching key. Please try again.";
+                messageEl.innerHTML = "❌ Error fetching key. Please try again.";
             }
         }
 
         function copyToClipboard() {
             const pgpKeyEl = document.getElementById("pgpKey");
+            const copyBtn = document.getElementById("copyBtn");
+
             navigator.clipboard.writeText(pgpKeyEl.textContent)
-                .then(() => alert("PGP Key copied to clipboard!"))
-                .catch(err => alert("Failed to copy text"));
+                .then(() => {
+                    copyBtn.textContent = "✔ Copied!";
+                    copyBtn.classList.add("copied");
+                    setTimeout(() => {
+                        copyBtn.textContent = "📋 Copy";
+                        copyBtn.classList.remove("copied");
+                    }, 1500);
+                })
+                .catch(err => console.error("Failed to copy text", err));
         }
     </script>
 
