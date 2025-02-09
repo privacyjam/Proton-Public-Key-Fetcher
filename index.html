@@ -25,7 +25,7 @@
             margin-bottom: 20px;
         }
 
-        input, button, select {
+        input, button {
             padding: 12px;
             margin: 10px 5px;
             font-size: 16px;
@@ -35,33 +35,18 @@
             box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        select {
-            width: 100%;
-            max-width: 600px;
-        }
-
         button {
             background-color: #007bff;
             color: white;
             cursor: pointer;
             transition: background 0.3s;
-            width: auto;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 5px;
         }
 
         button:hover {
             background-color: #0056b3;
-        }
-
-        .btn-advanced {
-            background-color: #6c757d;
-            color: white;
-            padding: 8px 12px;
-            font-size: 14px;
-            margin-top: 20px;
-        }
-
-        .btn-advanced:hover {
-            background-color: #5a6268;
         }
 
         #pgpKey {
@@ -92,31 +77,16 @@
             font-size: 14px;
             cursor: pointer;
             margin: 5px;
-            border: none;
             background: #007bff;
             color: white;
             border-radius: 5px;
             transition: background 0.3s;
             text-decoration: none;
+            display: inline-block;
         }
 
         .btn-small:hover {
             background: #0056b3;
-        }
-
-        #advanced-section {
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-            margin-top: 0;
-            background: #ffffff;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            max-width: 800px;
-            width: 100%;
-            text-align: left;
         }
 
         footer {
@@ -147,78 +117,25 @@
         <a class="btn-small" id="downloadLink" style="display:none;" download="public.asc">⬇️ Download .asc</a>
     </div>
 
-    <button class="btn-advanced" onclick="toggleAdvanced()">Advanced Options</button>
-    <div id="advanced-section" style="display: none;">
-        <h3>Advanced Options</h3>
-        <label for="urlSelect">Select API URL:</label>
-        <select id="urlSelect"></select>
-        <input type="url" id="customUrl" placeholder="Enter custom URL" style="display:none; width: 100%;">
-        <p id="customWarning" style="display:none; color: red;">
-            ⚠️ Provide the full URL (e.g., "https") including the search query (e.g., `?op=get&search=`). 
-            Final URL will look something like: 
-            <code>https://example.com/pks/lookup?op=get&search=contact@proton.me</code>
-        </p>
-    </div>
-
     <footer>
         <p><a href="https://github.com/jamjamr/Proton-Public-Key-Fetcher" target="_blank">View Source Code on GitHub</a></p>
     </footer>
 
     <script>
-        // Hardcoded variable to enable/disable custom URL functionality
-        const allowCustomURL = false;
-
-        const defaultUrls = [
-            "https://api.protonmail.ch/pks/lookup?op=get&search=",
-            "https://mail-api.proton.me/pks/lookup?op=get&search="
-        ];
-
-        window.onload = function () {
-            const urlSelect = document.getElementById("urlSelect");
-
-            defaultUrls.forEach(url => {
-                const option = document.createElement("option");
-                option.value = url;
-                option.textContent = url;
-                urlSelect.appendChild(option);
-            });
-
-            const customOption = document.createElement("option");
-            customOption.value = "custom";
-            customOption.textContent = "Custom URL";
-
-            if (!allowCustomURL) {
-                customOption.disabled = true;
-            }
-
-            urlSelect.appendChild(customOption);
-        };
-
         async function fetchPGPKey() {
             const email = document.getElementById("email").value.trim();
+            if (!email) return;
+
             const pgpKeyEl = document.getElementById("pgpKey");
             const copyBtn = document.getElementById("copyBtn");
             const downloadLink = document.getElementById("downloadLink");
-            const urlSelect = document.getElementById("urlSelect").value;
-            const customUrl = document.getElementById("customUrl").value;
 
             pgpKeyEl.textContent = "Fetching...";
-            let apiUrl = urlSelect;
 
-            if (urlSelect === "custom") {
-                if (!allowCustomURL) {
-                    pgpKeyEl.textContent = "Custom URL functionality is disabled.";
-                    return;
-                }
-                if (!customUrl) {
-                    pgpKeyEl.textContent = "Please enter a custom URL.";
-                    return;
-                }
-                apiUrl = customUrl;
-            }
+            const apiUrl = `https://api.cors.lol/?url=${encodeURIComponent("https://api.protonmail.ch/pks/lookup?op=get&search=" + email)}`;
 
             try {
-                const response = await fetch(`${apiUrl}${email}`);
+                const response = await fetch(apiUrl);
                 const text = await response.text();
                 pgpKeyEl.textContent = text;
 
@@ -234,29 +151,6 @@
             }
         }
 
-        function toggleAdvanced() {
-            const advancedSection = document.getElementById("advanced-section");
-
-            if (advancedSection.style.display === "none" || advancedSection.style.display === "") {
-                advancedSection.style.display = "block";
-                advancedSection.style.visibility = "visible";
-                advancedSection.style.opacity = "1";
-            } else {
-                advancedSection.style.display = "none";
-                advancedSection.style.visibility = "hidden";
-                advancedSection.style.opacity = "0";
-            }
-        }
-
-        document.getElementById("urlSelect").addEventListener("change", function () {
-            const customUrlInput = document.getElementById("customUrl");
-            const customWarning = document.getElementById("customWarning");
-            const isCustom = this.value === "custom";
-
-            customUrlInput.style.display = isCustom ? "inline-block" : "none";
-            customWarning.style.display = isCustom ? "block" : "none";
-        });
-
         function copyToClipboard() {
             const pgpKeyEl = document.getElementById("pgpKey");
             navigator.clipboard.writeText(pgpKeyEl.textContent).then(() => {
@@ -267,12 +161,13 @@
                 }, 1500);
             });
         }
-      document.getElementById("email").addEventListener("keypress", function(event) {
-         if (event.key === "Enter") {
-          event.preventDefault();
-         fetchPGPKey();
-         }
-    });
+
+        document.getElementById("email").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                fetchPGPKey();
+            }
+        });
     </script>
 
 </body>
