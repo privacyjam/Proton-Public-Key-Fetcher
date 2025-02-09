@@ -122,34 +122,50 @@
     </footer>
 
     <script>
-        async function fetchPGPKey() {
-            const email = document.getElementById("email").value.trim();
-            if (!email) return;
+async function fetchPGPKey() {
+    const email = document.getElementById("email").value.trim();
+    if (!email) return;
 
-            const pgpKeyEl = document.getElementById("pgpKey");
-            const copyBtn = document.getElementById("copyBtn");
-            const downloadLink = document.getElementById("downloadLink");
+    const pgpKeyEl = document.getElementById("pgpKey");
+    const copyBtn = document.getElementById("copyBtn");
+    const downloadLink = document.getElementById("downloadLink");
 
-            pgpKeyEl.textContent = "Fetching...";
+    pgpKeyEl.textContent = "Fetching...";
 
-            const apiUrl = `https://api.cors.lol/?url=${encodeURIComponent("https://api.protonmail.ch/pks/lookup?op=get&search=" + email)}`;
+    const rawUrl = `https://api.protonmail.ch/pks/lookup?op=get&search=${encodeURIComponent(email)}`;
+    const proxyUrl = `https://api.cors.lol/?url=${encodeURIComponent(rawUrl)}`;
 
-            try {
-                const response = await fetch(apiUrl);
-                const text = await response.text();
-                pgpKeyEl.textContent = text;
-
-                copyBtn.style.display = "inline-block";
-                downloadLink.style.display = "inline-block";
-
-                const blob = new Blob([text], { type: "text/plain" });
-                downloadLink.href = URL.createObjectURL(blob);
-            } catch {
-                pgpKeyEl.textContent = "Error fetching key. Please try again.";
-                copyBtn.style.display = "inline-block";
-                downloadLink.style.display = "inline-block";
-            }
+    try {
+        const response = await fetch(rawUrl);
+        if (!response.ok) throw new Error("Direct request failed");
+        const text = await response.text();
+        updateUI(text);
+    } catch {
+        try {
+            const response = await fetch(proxyUrl);
+            if (!response.ok) throw new Error("Proxy request failed");
+            const text = await response.text();
+            updateUI(text);
+        } catch {
+            pgpKeyEl.textContent = "Error fetching key. Please try again.";
+            copyBtn.style.display = "inline-block";
+            downloadLink.style.display = "inline-block";
         }
+    }
+}
+
+function updateUI(text) {
+    const pgpKeyEl = document.getElementById("pgpKey");
+    const copyBtn = document.getElementById("copyBtn");
+    const downloadLink = document.getElementById("downloadLink");
+
+    pgpKeyEl.textContent = text;
+    copyBtn.style.display = "inline-block";
+    downloadLink.style.display = "inline-block";
+
+    const blob = new Blob([text], { type: "text/plain" });
+    downloadLink.href = URL.createObjectURL(blob);
+}
 
         function copyToClipboard() {
             const pgpKeyEl = document.getElementById("pgpKey");
