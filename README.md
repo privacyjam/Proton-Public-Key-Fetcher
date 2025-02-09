@@ -1,4 +1,5 @@
 ### This will not work if localy as a file because of cross site stuff, it must be run on a webserver
+I will fix that next update
 
 ![image](https://github.com/user-attachments/assets/fa62929e-3077-4646-b786-a2d910e17a6a)
 
